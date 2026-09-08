@@ -1,0 +1,27 @@
+# Screenglaze: read access to the two physical buttons, and to nothing else.
+#
+# TAG+="uaccess" rather than the 'input' group, on purpose. Putting the user in
+# 'input' hands EVERY program they run the whole touchscreen -- that is a
+# keylogger for anything typed on the on-screen keyboard, granted permanently,
+# to get at two buttons. 'uaccess' grants an ACL to the user of the currently
+# active seat session only, and only on the devices named here.
+#
+# The number has to be LOWER than 73: 73-seat-late.rules is what turns the tag
+# into an actual ACL, and a tag set after it runs is a tag nobody reads.
+#
+# The names are this phone's (POCO X3 NFC, sm7150). If a kernel update renames
+# them the combo stops working silently -- `screenglaze --comprobar` is what
+# says so, and `cat /proc/bus/input/devices` is where the new names are.
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="pm8941_pwrkey", TAG+="uaccess"
+SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="pm8941_resin", TAG+="uaccess"
+
+# And /dev/uinput, to hand the volume key BACK.
+#
+# Screenglaze takes volume-down away from the compositor for 150 ms to see
+# whether a screenshot is starting. If it is not, the press has to be replayed,
+# and a virtual input device is the only way to put a key event back into the
+# system. Without this the key would simply be eaten.
+#
+# static_node because /dev/uinput belongs to a module and may exist before any
+# uevent that udev could react to; the tag alone would then apply to nothing.
+KERNEL=="uinput", SUBSYSTEM=="misc", OPTIONS+="static_node=uinput", TAG+="uaccess"

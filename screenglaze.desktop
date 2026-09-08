@@ -1,0 +1,23 @@
+[Desktop Entry]
+Type=Application
+Name=Screenglaze
+GenericName=Screenshot
+GenericName[es]=Captura de pantalla
+Comment=Capture with volume-down + power. From here, capture now.
+Comment[es]=Captura con bajar-volumen + encendido. Desde aquí, captura ahora.
+Exec=screenglaze
+Icon=screenglaze
+Terminal=false
+Categories=Utility;Graphics;Qt;
+Keywords=capture;screen;screenshot;crop;share;
+Keywords[es]=captura;pantalla;screenshot;recortar;compartir;
+# Launching it while the service is already running does NOT start a second
+# copy: the new process hands the request to the one that is watching the
+# buttons and exits. So this entry behaves as a shutter button, which is worth
+# having for the times both hands are busy holding the phone still.
+#
+# Without StartupWMClass Plasma cannot tie the window to this entry: the id is
+# built by Qt from QGuiApplication::setDesktopFileName(), so the two have to
+# agree. (The overlay is a layer-shell surface and never appears in the task
+# switcher anyway -- this matters for the launcher's own bookkeeping.)
+StartupWMClass=screenglaze

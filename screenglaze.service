@@ -1,0 +1,44 @@
+[Unit]
+# Screenglaze has to be running for the key combo to exist at all: there is no
+# daemon behind it, the process itself is what holds the two /dev/input file
+# descriptors. If it is not running, the buttons do nothing.
+Description=Screenglaze: capturas con bajar-volumen + encendido
+Documentation=file:///usr/share/doc/screenglaze/README.md
+PartOf=graphical-session.target
+After=graphical-session.target
+
+# A rate limit, but a generous one. Without any, a version that crashed on
+# startup would respawn twice a second forever and fill the journal. Twenty
+# tries in two minutes is far more than a user closing it could ever cause, and
+# still ends in a clean 'failed' state if the binary is genuinely broken.
+#
+# These live in [Unit], NOT in [Service]. systemd accepts the file either way --
+# it just logs "Unknown key ... ignoring" and runs with no limit at all, which
+# is exactly the runaway this was meant to prevent, and looks like it works.
+StartLimitIntervalSec=120
+StartLimitBurst=20
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/screenglaze
+
+# Restart=always, and here that is the requested behaviour rather than a
+# default: this is meant to be impossible to switch off by accident, the way
+# the screenshot key on a phone is.
+#
+# It stays stoppable ON PURPOSE. Restart=always only reacts to the process
+# exiting by itself; `systemctl --user stop screenglaze` still stops it and it
+# stays stopped. That is the way out if it ever misbehaves, and it is why this
+# is not a system unit -- see the note in gps.d/geoclue-agent.service about
+# always-restart fighting a user's switch.
+Restart=always
+RestartSec=2
+
+# The session already exports WAYLAND_DISPLAY and DBUS_SESSION_BUS_ADDRESS
+# (checked with `systemctl --user show-environment`), but the platform is left
+# to be guessed from them. Saying it outright means the unit does not silently
+# fall back to a different backend after an update.
+Environment=QT_QPA_PLATFORM=wayland
+
+[Install]
+WantedBy=graphical-session.target
