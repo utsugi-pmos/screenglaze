@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Screenglaze. Four crop marks around a screen, with the flash going off.
+
+  Corner marks rather than a camera: what this does is frame a rectangle of
+  screen, not take a photograph of the world, and the crop marks are the one
+  symbol that says "region" in every editor anyone has used.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <defs>
+    <linearGradient id="glaze" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5a9cff"/>
+      <stop offset="1" stop-color="#1a73e8"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="#202124"/>
+
+  <!-- the piece of screen being kept -->
+  <rect x="15" y="15" width="18" height="18" rx="3" fill="url(#glaze)" opacity="0.92"/>
+
+  <!-- crop marks -->
+  <g fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round">
+    <path d="M12 18 V13 a1 1 0 0 1 1 -1 H18"/>
+    <path d="M30 12 H35 a1 1 0 0 1 1 1 V18"/>
+    <path d="M36 30 V35 a1 1 0 0 1 -1 1 H30"/>
+    <path d="M18 36 H13 a1 1 0 0 1 -1 -1 V30"/>
+  </g>
+</svg>
