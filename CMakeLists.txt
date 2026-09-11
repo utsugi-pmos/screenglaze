@@ -5,7 +5,7 @@
 # has to own an EVIOCGRAB on the power button for the few milliseconds the combo
 # lasts. A script cannot hold a grab across two devices without racing itself.
 cmake_minimum_required(VERSION 3.20)
-project(screenglaze VERSION 1.0)
+project(screenglaze VERSION 1.1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
