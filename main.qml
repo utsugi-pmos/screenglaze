@@ -109,7 +109,7 @@ Window {
 			// throwaway file in ~/.cache we are about to delete.
 			const u = app.shareUrl()
 			if (u.length > 0)
-				compartir.open_it(u)
+				share.open_it(u)
 		}
 		onCropRequested: {
 			cropper.picture = sheet.pictureRect
@@ -140,9 +140,9 @@ Window {
 	// --- the share sheet ------------------------------------------------------
 	// Above the screenshot sheet and below the flash.
 	Share {
-		id: compartir
+		id: share
 		anchors.fill: parent
-		onCerrado: (compartido) => app.sharedDone(compartido)
+		onClosed: (shared) => app.sharedDone(shared)
 	}
 
 	// --- the flash ----------------------------------------------------------

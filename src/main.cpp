@@ -32,22 +32,22 @@ const auto busName = QStringLiteral("org.surya.Screenglaze");
 // QIcon is already configured in main() with its search paths and with breeze as
 // a fallback, which is what is needed for this to find something when starting
 // from systemd.
-class IconosDelTema : public QQuickImageProvider
+class ThemeIcons : public QQuickImageProvider
 {
 public:
-	IconosDelTema()
+	ThemeIcons()
 		: QQuickImageProvider(QQuickImageProvider::Pixmap)
 	{
 	}
 
-	QPixmap requestPixmap(const QString &id, QSize *size, const QSize &pedido) override
+	QPixmap requestPixmap(const QString &id, QSize *size, const QSize &requested) override
 	{
-		const int lado = pedido.width() > 0 ? pedido.width() : 48;
-		QPixmap p = QIcon::fromTheme(id).pixmap(lado, lado);
+		const int side = requested.width() > 0 ? requested.width() : 48;
+		QPixmap p = QIcon::fromTheme(id).pixmap(side, side);
 		// A destination without an icon would still be usable, but a row with a
 		// gap where there should be something reads as "this is broken".
 		if (p.isNull())
-			p = QIcon::fromTheme(QStringLiteral("emblem-shared")).pixmap(lado, lado);
+			p = QIcon::fromTheme(QStringLiteral("emblem-shared")).pixmap(side, side);
 		if (size)
 			*size = p.size();
 		return p;
@@ -87,7 +87,9 @@ int main(int argc, char *argv[])
 		|| args.contains(QStringLiteral("--comprobar"));
 	if (checking)
 		qputenv("QT_QPA_PLATFORM", "offscreen");
-	else if (qEnvironmentVariableIsEmpty("SCREENGLAZE_SIN_CAPA"))
+	// SCREENGLAZE_NO_LAYER_SHELL was SCREENGLAZE_SIN_CAPA; both still work.
+	else if (qEnvironmentVariableIsEmpty("SCREENGLAZE_NO_LAYER_SHELL")
+		&& qEnvironmentVariableIsEmpty("SCREENGLAZE_SIN_CAPA"))
 		qputenv("QT_WAYLAND_SHELL_INTEGRATION", "layer-shell");
 
 	// Wayland reports the wrong physical DPI on this phone, and rounding the
@@ -182,15 +184,16 @@ int main(int argc, char *argv[])
 		QDBusConnection::ExportScriptableInvokables);
 
 	QQmlApplicationEngine engine;
-	engine.addImageProvider(QStringLiteral("icono"), new IconosDelTema);
+	engine.addImageProvider(QStringLiteral("icon"), new ThemeIcons);
 	engine.rootContext()->setContextProperty(QStringLiteral("app"), &backend);
 	engine.load(QUrl(QStringLiteral("qrc:/qt/qml/Screenglaze/main.qml")));
 	if (engine.rootObjects().isEmpty())
 		return 1;
 
-	// --capturar: take one straight away. Handy for testing over ssh, where
-	// there are no buttons to press.
-	if (args.contains(QStringLiteral("--capturar")))
+	// --capture: take one straight away. Handy for testing over ssh, where
+	// there are no buttons to press. --capturar, its old name, still works.
+	if (args.contains(QStringLiteral("--capture"))
+		|| args.contains(QStringLiteral("--capturar")))
 		QTimer::singleShot(500, &backend, &Backend::shoot);
 
 	return app.exec();

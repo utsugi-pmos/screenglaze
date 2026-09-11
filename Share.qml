@@ -25,10 +25,10 @@ Item {
 	id: root
 
 	// file:// of what is being shared. Empty while there is nothing.
-	property url objetivo
+	property url target
 	property real input: 0        // 0 off screen, 1 all the way up
 
-	signal cerrado(bool compartido)
+	signal closed(bool shared)
 
 	// THE TARGETS THAT BEHAVE WELL ON A PHONE, and only those.
 	//
@@ -53,10 +53,10 @@ Item {
 	]
 
 	function open_it(url) {
-		objetivo = url
+		target = url
 		input = 0
 		visible = true
-		subir.restart()
+		slideUp.restart()
 	}
 
 	visible: false
@@ -69,23 +69,23 @@ Item {
 		opacity: 0.55 * root.input
 		MouseArea {
 			anchors.fill: parent
-			onClicked: root.salir(false)
+			onClicked: root.leave(false)
 		}
 	}
 
-	function salir(compartido) {
-		bajar.compartido = compartido
-		bajar.restart()
+	function leave(shared) {
+		slideDown.shared = shared
+		slideDown.restart()
 	}
 
 	NumberAnimation {
-		id: subir
+		id: slideUp
 		target: root; property: "input"; from: 0; to: 1
 		duration: Glaze.quick; easing.type: Easing.OutCubic
 	}
 	SequentialAnimation {
-		id: bajar
-		property bool compartido: false
+		id: slideDown
+		property bool shared: false
 		NumberAnimation {
 			target: root; property: "input"; to: 0
 			duration: Glaze.quick; easing.type: Easing.InCubic
@@ -93,21 +93,21 @@ Item {
 		ScriptAction {
 			script: {
 				root.visible = false
-				root.cerrado(bajar.compartido)
+				root.closed(slideDown.shared)
 			}
 		}
 	}
 
 	// --- the sheet ------------------------------------------------------------
 	Rectangle {
-		id: hoja
+		id: sheet
 		anchors.left: parent.left
 		anchors.right: parent.right
 		anchors.bottom: parent.bottom
 		// Rises up from below the edge. Natural height -- AlternativesView exposes
 		// its list's height in implicitHeight -- but never more than two thirds of
 		// the screen: with 16 targets it would run off the top.
-		height: Math.min(64 + alternativas.implicitHeight + 24,
+		height: Math.min(64 + alternatives.implicitHeight + 24,
 			root.height * 0.66)
 		y: root.height - height * root.input
 		color: Glaze.sheet
@@ -118,7 +118,7 @@ Item {
 		// what says "this rises from the bottom and can be closed", and without it
 		// the sheet looks like a window that appeared out of nowhere.
 		Rectangle {
-			id: tirador
+			id: handle
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: 10
@@ -130,8 +130,8 @@ Item {
 		}
 
 		Text {
-			id: cabecera
-			anchors.top: tirador.bottom
+			id: header
+			anchors.top: handle.bottom
 			anchors.topMargin: 14
 			anchors.left: parent.left
 			anchors.leftMargin: 22
@@ -142,8 +142,8 @@ Item {
 		}
 
 		Purpose.AlternativesView {
-			id: alternativas
-			anchors.top: cabecera.bottom
+			id: alternatives
+			anchors.top: header.bottom
 			anchors.topMargin: 12
 			anchors.left: parent.left
 			anchors.right: parent.right
@@ -155,17 +155,17 @@ Item {
 			// filtered out and targets that would fail on use show up.
 			pluginType: "Export"
 			inputData: {
-				"urls": [ root.objetivo.toString() ],
+				"urls": [ root.target.toString() ],
 				"mimeType": "image/png"
 			}
 
 			// Purpose switches to its progress view by itself when a job starts.
 			// When it finishes, the sheet goes away.
-			onRunningChanged: if (!running && seHaUsado) root.salir(true)
-			property bool seHaUsado: false
+			onRunningChanged: if (!running && wasUsed) root.leave(true)
+			property bool wasUsed: false
 
 			delegate: Item {
-				id: fila
+				id: row
 				// The names have to match the roles of Purpose's model.
 				// 'actionDisplay' already comes translated by the plugin -- the
 				// Telegram one brings "Send via Telegram".
@@ -180,12 +180,12 @@ Item {
 				// height is the sum of the delegates, collapsing shrinks the sheet
 				// just as if they did not exist -- and the indices createJob()
 				// expects stay the same.
-				readonly property bool permitido:
+				readonly property bool allowed:
 					root.allowed.indexOf(pluginId) >= 0
 
 				width: ListView.view ? ListView.view.width : 0
-				height: permitido ? 62 : 0
-				visible: permitido
+				height: allowed ? 62 : 0
+				visible: allowed
 
 				Rectangle {
 					anchors.fill: parent
@@ -193,7 +193,7 @@ Item {
 				}
 
 				Image {
-					id: icono
+					id: icon
 					anchors.left: parent.left
 					anchors.leftMargin: 22
 					anchors.verticalCenter: parent.verticalCenter
@@ -202,18 +202,18 @@ Item {
 					// From the icon theme, served by the provider main.cpp
 					// registers. In bare QtQuick there is no way to paint an icon by
 					// name, and these names are set by each plugin.
-					source: "image://icono/" + fila.iconName
+					source: "image://icon/" + row.iconName
 					sourceSize: Qt.size(60, 60)
 					smooth: true
 				}
 
 				Text {
-					anchors.left: icono.right
+					anchors.left: icon.right
 					anchors.leftMargin: 18
 					anchors.right: parent.right
 					anchors.rightMargin: 22
 					anchors.verticalCenter: parent.verticalCenter
-					text: fila.actionDisplay
+					text: row.actionDisplay
 					color: Glaze.ink
 					font.pixelSize: 15
 					elide: Text.ElideRight
@@ -224,8 +224,8 @@ Item {
 					anchors.fill: parent
 					onClicked: {
 						app.feedback("button-pressed")
-						alternativas.seHaUsado = true
-						alternativas.createJob(fila.index)
+						alternatives.wasUsed = true
+						alternatives.createJob(row.index)
 					}
 				}
 			}

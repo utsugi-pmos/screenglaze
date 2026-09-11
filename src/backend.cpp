@@ -34,7 +34,15 @@ QString galleryDir()
 	QString base = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
 	if (base.isEmpty())
 		base = QDir::homePath();
-	return base + QStringLiteral("/Capturas");
+	// The folder used to be called "Capturas". A phone that has been taking
+	// screenshots for months has them all in there, and switching the name
+	// would split the user's own pictures across two folders with nothing
+	// saying why. So: keep using the old one where it already exists, and only
+	// name new installations in English.
+	const QString old = base + QStringLiteral("/Capturas");
+	if (QDir(old).exists())
+		return old;
+	return base + QStringLiteral("/Screenshots");
 }
 
 } // namespace
@@ -262,8 +270,9 @@ QString Backend::shareUrl()
 
 void Backend::sharedDone(bool shared)
 {
-	say(shared ? QStringLiteral("Shared, and saved to Capturas")
-		   : QStringLiteral("Saved to Capturas"));
+	const QString where = QFileInfo(galleryDir()).fileName();
+	say(shared ? QStringLiteral("Shared, and saved to %1").arg(where)
+		   : QStringLiteral("Saved to %1").arg(where));
 	finish();
 }
 
@@ -296,7 +305,7 @@ bool Backend::crop(qreal x, qreal y, qreal w, qreal h)
 	const QImage cut = img.copy(r);
 	// A new name, not the same one: QML's Image caches by URL, and rewriting
 	// the file underneath it would leave the old picture on screen.
-	const QString target = QStringLiteral("%1/recorte-%2.png")
+	const QString target = QStringLiteral("%1/crop-%2.png")
 		.arg(m_capture->stagingDir(),
 			QString::number(QDateTime::currentMSecsSinceEpoch()));
 	if (!cut.save(target, "PNG"))

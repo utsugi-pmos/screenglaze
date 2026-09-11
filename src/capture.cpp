@@ -26,7 +26,7 @@ Capture::Capture(QObject *parent)
 	// kind of thing that makes a future "clean up leftovers" delete the wrong
 	// thing.
 	m_staging = QStandardPaths::writableLocation(QStandardPaths::CacheLocation)
-		+ QStringLiteral("/pendientes");
+		+ QStringLiteral("/pending");
 	QDir().mkpath(m_staging);
 
 	auto bus = QDBusConnection::sessionBus();
@@ -53,8 +53,12 @@ Capture::Capture(QObject *parent)
 	// feedback at all for a second and a half, which feels broken. Either the
 	// wait is short or the click has to come early and out of step. 84 MB out
 	// of this phone's 5.5 GB buys the short wait.
-	if (qEnvironmentVariableIsEmpty("SCREENGLAZE_CALIENTE")
-		|| qEnvironmentVariableIntValue("SCREENGLAZE_CALIENTE") != 0) {
+	// SCREENGLAZE_WARM was SCREENGLAZE_CALIENTE; both are honoured so a script
+	// or a unit that already sets the old one keeps working.
+	const char *warm = qEnvironmentVariableIsEmpty("SCREENGLAZE_WARM")
+		? "SCREENGLAZE_CALIENTE" : "SCREENGLAZE_WARM";
+	if (qEnvironmentVariableIsEmpty(warm)
+		|| qEnvironmentVariableIntValue(warm) != 0) {
 		m_keepWarm = true;
 		bus.connect(QStringLiteral("org.freedesktop.DBus"),
 			QStringLiteral("/org/freedesktop/DBus"),
@@ -133,7 +137,7 @@ void Capture::onTaken(const QString &where)
 	// folder. If we left it there, "Save" would be a button that does
 	// nothing and "Close" would have to delete a file the user never asked us
 	// to put there. Staging it first makes both buttons honest.
-	const QString target = QStringLiteral("%1/captura-%2.png").arg(m_staging,
+	const QString target = QStringLiteral("%1/screenshot-%2.png").arg(m_staging,
 		QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-hhmmss-zzz")));
 
 	QFile::remove(target);
