@@ -2,7 +2,7 @@
 # Screenglaze has to be running for the key combo to exist at all: there is no
 # daemon behind it, the process itself is what holds the two /dev/input file
 # descriptors. If it is not running, the buttons do nothing.
-Description=Screenglaze: capturas con bajar-volumen + encendido
+Description=Screenglaze: screenshots with volume-down + power
 Documentation=file:///usr/share/doc/screenglaze/README.md
 PartOf=graphical-session.target
 After=graphical-session.target
