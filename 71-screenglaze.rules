@@ -10,7 +10,7 @@
 # into an actual ACL, and a tag set after it runs is a tag nobody reads.
 #
 # The names are this phone's (POCO X3 NFC, sm7150). If a kernel update renames
-# them the combo stops working silently -- `screenglaze --comprobar` is what
+# them the combo stops working silently -- `screenglaze --check` is what
 # says so, and `cat /proc/bus/input/devices` is where the new names are.
 SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="pm8941_pwrkey", TAG+="uaccess"
 SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="pm8941_resin", TAG+="uaccess"

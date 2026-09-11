@@ -26,7 +26,7 @@ Item {
 
 	// file:// of what is being shared. Empty while there is nothing.
 	property url objetivo
-	property real entrada: 0        // 0 off screen, 1 all the way up
+	property real input: 0        // 0 off screen, 1 all the way up
 
 	signal cerrado(bool compartido)
 
@@ -44,7 +44,7 @@ Item {
 	//
 	// To add one: look at 'ls /usr/lib/qt6/plugins/kf6/purpose/' and TRY IT on the
 	// phone before keeping it, which is exactly the step that was missing.
-	readonly property var permitidos: [
+	readonly property var allowed: [
 		"clipboard",      // copy to the clipboard: opens nothing
 		"saveas",         // save as: Plasma's file chooser
 		"bluetooth",      // send over Bluetooth: Plasma's chooser
@@ -52,9 +52,9 @@ Item {
 		"kdeconnectsms"
 	]
 
-	function abrir(url) {
+	function open_it(url) {
 		objetivo = url
-		entrada = 0
+		input = 0
 		visible = true
 		subir.restart()
 	}
@@ -66,7 +66,7 @@ Item {
 	Rectangle {
 		anchors.fill: parent
 		color: "#000000"
-		opacity: 0.55 * root.entrada
+		opacity: 0.55 * root.input
 		MouseArea {
 			anchors.fill: parent
 			onClicked: root.salir(false)
@@ -80,14 +80,14 @@ Item {
 
 	NumberAnimation {
 		id: subir
-		target: root; property: "entrada"; from: 0; to: 1
+		target: root; property: "input"; from: 0; to: 1
 		duration: Glaze.quick; easing.type: Easing.OutCubic
 	}
 	SequentialAnimation {
 		id: bajar
 		property bool compartido: false
 		NumberAnimation {
-			target: root; property: "entrada"; to: 0
+			target: root; property: "input"; to: 0
 			duration: Glaze.quick; easing.type: Easing.InCubic
 		}
 		ScriptAction {
@@ -109,7 +109,7 @@ Item {
 		// the screen: with 16 targets it would run off the top.
 		height: Math.min(64 + alternativas.implicitHeight + 24,
 			root.height * 0.66)
-		y: root.height - height * root.entrada
+		y: root.height - height * root.input
 		color: Glaze.sheet
 		topLeftRadius: Glaze.radius
 		topRightRadius: Glaze.radius
@@ -181,7 +181,7 @@ Item {
 				// just as if they did not exist -- and the indices createJob()
 				// expects stay the same.
 				readonly property bool permitido:
-					root.permitidos.indexOf(pluginId) >= 0
+					root.allowed.indexOf(pluginId) >= 0
 
 				width: ListView.view ? ListView.view.width : 0
 				height: permitido ? 62 : 0

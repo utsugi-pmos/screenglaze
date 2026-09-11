@@ -57,7 +57,7 @@ public:
 	enum class Mode {
 		// Take the keys and act on them. What the service does.
 		Watch,
-		// Look, but touch nothing. --comprobar runs while the real service is
+		// Look, but touch nothing. --check runs while the real service is
 		// already up, and a diagnostic that grabbed the keys would STEAL them
 		// from the running copy and hand them back on exit, leaving the service
 		// silently unable to hold what it thinks it holds. A check that breaks

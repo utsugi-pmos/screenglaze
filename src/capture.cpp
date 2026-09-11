@@ -130,8 +130,8 @@ void Capture::onTaken(const QString &where)
 	// Move it out of the gallery immediately.
 	//
 	// Spectacle saves where the user configured it to, which is the pictures
-	// folder. If we left it there, "Guardar" would be a button that does
-	// nothing and "Cerrar" would have to delete a file the user never asked us
+	// folder. If we left it there, "Save" would be a button that does
+	// nothing and "Close" would have to delete a file the user never asked us
 	// to put there. Staging it first makes both buttons honest.
 	const QString target = QStringLiteral("%1/captura-%2.png").arg(m_staging,
 		QDateTime::currentDateTime().toString(QStringLiteral("yyyyMMdd-hhmmss-zzz")));

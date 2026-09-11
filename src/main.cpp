@@ -77,11 +77,14 @@ int main(int argc, char *argv[])
 	// The escape hatch is deliberate: if a KWin update ever breaks layer-shell,
 	// SCREENGLAZE_SIN_CAPA=1 turns the overlay back into an ordinary window and
 	// the application still works, just less prettily.
-	// --comprobar only looks at /dev/input and at D-Bus: it has no window and
+	// --check only looks at /dev/input and at D-Bus: it has no window and
 	// no need of one. Without this it is run over ssh, finds no display, falls
 	// back to xcb and aborts -- so the one command meant to diagnose a broken
 	// install would itself be the thing that looked broken.
-	const bool checking = args.contains(QStringLiteral("--comprobar"));
+	// --comprobar was the flag's first name and still works: it is in the udev
+	// rules' comment, in the README and in the notes.
+	const bool checking = args.contains(QStringLiteral("--check"))
+		|| args.contains(QStringLiteral("--comprobar"));
 	if (checking)
 		qputenv("QT_QPA_PLATFORM", "offscreen");
 	else if (qEnvironmentVariableIsEmpty("SCREENGLAZE_SIN_CAPA"))
@@ -96,7 +99,7 @@ int main(int argc, char *argv[])
 	QGuiApplication app(argc, argv);
 	QCoreApplication::setApplicationName(QStringLiteral("screenglaze"));
 
-	// --comprobar: say what the service can and cannot do, and exit. This is
+	// --check: say what the service can and cannot do, and exit. This is
 	// what the setup script runs to verify the install, because "the unit is
 	// active" says nothing about whether the buttons are readable.
 	if (checking) {
