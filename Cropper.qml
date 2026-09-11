@@ -210,12 +210,12 @@ Item {
 
 		Button {
 			shape: Glaze.shapeClose
-			text: qsTr("Cancelar")
+			text: qsTr("Cancel")
 			onClicked: root.cancelled()
 		}
 		Button {
 			shape: Glaze.shapeCheck
-			text: qsTr("Recortar")
+			text: qsTr("Crop")
 			highlighted: true
 			onClicked: {
 				if (root.picture.width <= 0 || root.picture.height <= 0)
