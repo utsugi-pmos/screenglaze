@@ -109,7 +109,7 @@ Window {
 			// throwaway file in ~/.cache we are about to delete.
 			const u = app.shareUrl()
 			if (u.length > 0)
-				compartir.abrir(u)
+				compartir.open_it(u)
 		}
 		onCropRequested: {
 			cropper.picture = sheet.pictureRect
@@ -239,7 +239,7 @@ Window {
 		ScriptAction { script: root.visible = false }
 	}
 
-	// Escape does what Cerrar does. There is no keyboard on this phone, but
+	// Escape does what Close does. There is no keyboard on this phone, but
 	// there is over ssh, and that is where this gets debugged.
 	Item {
 		focus: true
