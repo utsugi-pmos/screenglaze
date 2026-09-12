@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	// platform plugin picks its shell integration.
 	//
 	// The escape hatch is deliberate: if a KWin update ever breaks layer-shell,
-	// SCREENGLAZE_SIN_CAPA=1 turns the overlay back into an ordinary window and
+	// SCREENGLAZE_NO_LAYER_SHELL=1 turns the overlay back into an ordinary window and
 	// the application still works, just less prettily.
 	// --check only looks at /dev/input and at D-Bus: it has no window and
 	// no need of one. Without this it is run over ssh, finds no display, falls
