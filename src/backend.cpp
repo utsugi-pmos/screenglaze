@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.0-or-later
 #include "backend.h"
 
-#include "buttons.h"
 #include "capture.h"
 
 #include <QDBusConnection>
@@ -49,23 +48,13 @@ QString galleryDir()
 
 Backend::Backend(QObject *parent)
 	: QObject(parent)
-	, m_buttons(new Buttons(Buttons::Mode::Watch, this))
 	, m_capture(new Capture(this))
 {
-	connect(m_buttons, &Buttons::combo, this, &Backend::onCombo);
+	// The buttons are not watched here any more. phone-keyconfig owns the
+	// power and volume keys and calls shoot() over D-Bus when it sees the
+	// chord; this object only has to be on the bus and ready to take the call.
 	connect(m_capture, &Capture::ready, this, &Backend::onReady);
 	connect(m_capture, &Capture::failed, this, &Backend::onFailed);
-
-	if (m_buttons->ready()) {
-		for (const QString &line : m_buttons->watching())
-			qInfo("screenglaze: listening on %s", qPrintable(line));
-	} else {
-		// Loud, because the failure is otherwise invisible: the service runs,
-		// the log is clean, and the combo simply never does anything.
-		qWarning("screenglaze: there is NO readable button. The udev rule"
-			" (71-screenglaze.rules) is missing or the session is not the seat's"
-			" active one.");
-	}
 
 	m_idle.setSingleShot(true);
 	m_idle.setInterval(45000);
@@ -81,11 +70,6 @@ Backend::Backend(QObject *parent)
 
 	// Pay Spectacle's start-up cost now, while nobody is waiting for it.
 	m_capture->warmUp();
-}
-
-bool Backend::armed() const
-{
-	return m_buttons->ready();
 }
 
 void Backend::onCombo()

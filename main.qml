@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: LGPL-2.0-or-later
 //
 // The overlay. Invisible almost all of the time -- this process spends its life
-// waiting for two buttons, and this window only exists for the few seconds
-// after they are pressed.
+// waiting for phone-keyconfig to call shoot() over D-Bus, and this window only
+// exists for the few seconds after that call.
 //
 // It is a LAYER-SHELL surface, not an ordinary window. That is what lets it
 // cover the panel and the app underneath without ever becoming an entry in the

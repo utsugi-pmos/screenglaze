@@ -1,20 +1,22 @@
 [Desktop Entry]
+NoDisplay=true
 Type=Application
 Name=Screenglaze
 GenericName=Screenshot
 GenericName[es]=Captura de pantalla
-Comment=Capture with volume-down + power. From here, capture now.
-Comment[es]=Captura con bajar-volumen + encendido. Desde aquí, captura ahora.
+Comment=Screenshot sheet: share, save or crop
+Comment[es]=Captura de pantalla: compartir, guardar o recortar
 Exec=screenglaze
 Icon=screenglaze
 Terminal=false
 Categories=Utility;Graphics;Qt;
 Keywords=capture;screen;screenshot;crop;share;
 Keywords[es]=captura;pantalla;screenshot;recortar;compartir;
-# Launching it while the service is already running does NOT start a second
-# copy: the new process hands the request to the one that is watching the
-# buttons and exits. So this entry behaves as a shutter button, which is worth
-# having for the times both hands are busy holding the phone still.
+# Hidden from the app drawer (NoDisplay). Screenshots are triggered by
+# phone-keyconfig, which watches the buttons and calls shoot() on
+# org.surya.Screenglaze over D-Bus; there is nothing for a launcher tile to do.
+# The entry still exists so Plasma can tie the overlay window to an icon and a
+# name, and so `screenglaze` from a terminal has a desktop id to answer to.
 #
 # Without StartupWMClass Plasma cannot tie the window to this entry: the id is
 # built by Qt from QGuiApplication::setDesktopFileName(), so the two have to
