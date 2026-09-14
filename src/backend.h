@@ -7,7 +7,6 @@
 #include <QString>
 #include <QTimer>
 
-class Buttons;
 class Capture;
 
 // Everything the QML is allowed to do, and the order the pieces happen in.
@@ -33,7 +32,6 @@ class Backend : public QObject
 	Q_PROPERTY(int imageWidth READ imageWidth NOTIFY imageChanged)
 	Q_PROPERTY(int imageHeight READ imageHeight NOTIFY imageChanged)
 	Q_PROPERTY(QString notice READ notice NOTIFY noticeChanged)
-	Q_PROPERTY(bool armed READ armed CONSTANT)
 
 public:
 	explicit Backend(QObject *parent = nullptr);
@@ -42,11 +40,11 @@ public:
 	int imageWidth() const { return m_size.width(); }
 	int imageHeight() const { return m_size.height(); }
 	QString notice() const { return m_notice; }
-	bool armed() const;
 
-	// Take one now, as if the combo had been pressed. This is what the D-Bus
-	// entry point and the launcher icon call. Q_SCRIPTABLE is what puts it --
-	// and only it -- on the bus; the other invokables stay private to the QML.
+	// Take one now. This is the D-Bus entry point: phone-keyconfig calls it
+	// when it sees the volume-down + power chord, and `screenglaze --capture`
+	// calls it from a terminal. Q_SCRIPTABLE is what puts it -- and only it --
+	// on the bus; the other invokables stay private to the QML.
 	Q_INVOKABLE Q_SCRIPTABLE void shoot();
 
 	Q_INVOKABLE void save();
@@ -89,7 +87,6 @@ private:
 	void say(const QString &text);
 	void finish();
 
-	Buttons *m_buttons = nullptr;
 	Capture *m_capture = nullptr;
 
 	QString m_file;   // absolute path in the staging dir

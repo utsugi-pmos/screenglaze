@@ -1,12 +1,7 @@
 // SPDX-License-Identifier: LGPL-2.0-or-later
 #include "backend.h"
-#include "buttons.h"
 
 #include <QDBusConnection>
-// The interface class is only forward-declared by <QDBusConnection>, so
-// sessionBus().interface() gives back a pointer to an incomplete type without
-// this. The error names the method, not the missing header.
-#include <QDBusConnectionInterface>
 #include <QDBusMessage>
 #include <QGuiApplication>
 #include <QIcon>
@@ -77,18 +72,9 @@ int main(int argc, char *argv[])
 	// The escape hatch is deliberate: if a KWin update ever breaks layer-shell,
 	// SCREENGLAZE_NO_LAYER_SHELL=1 turns the overlay back into an ordinary window and
 	// the application still works, just less prettily.
-	// --check only looks at /dev/input and at D-Bus: it has no window and
-	// no need of one. Without this it is run over ssh, finds no display, falls
-	// back to xcb and aborts -- so the one command meant to diagnose a broken
-	// install would itself be the thing that looked broken.
-	// --comprobar was the flag's first name and still works: it is in the udev
-	// rules' comment, in the README and in the notes.
-	const bool checking = args.contains(QStringLiteral("--check"))
-		|| args.contains(QStringLiteral("--comprobar"));
-	if (checking)
-		qputenv("QT_QPA_PLATFORM", "offscreen");
+	//
 	// SCREENGLAZE_NO_LAYER_SHELL was SCREENGLAZE_SIN_CAPA; both still work.
-	else if (qEnvironmentVariableIsEmpty("SCREENGLAZE_NO_LAYER_SHELL")
+	if (qEnvironmentVariableIsEmpty("SCREENGLAZE_NO_LAYER_SHELL")
 		&& qEnvironmentVariableIsEmpty("SCREENGLAZE_SIN_CAPA"))
 		qputenv("QT_WAYLAND_SHELL_INTEGRATION", "layer-shell");
 
@@ -101,51 +87,16 @@ int main(int argc, char *argv[])
 	QGuiApplication app(argc, argv);
 	QCoreApplication::setApplicationName(QStringLiteral("screenglaze"));
 
-	// --check: say what the service can and cannot do, and exit. This is
-	// what the setup script runs to verify the install, because "the unit is
-	// active" says nothing about whether the buttons are readable.
-	if (checking) {
-		Buttons buttons(Buttons::Mode::Inspect);
-		const QStringList seen = buttons.watching();
-		for (const QString &line : seen)
-			std::printf("button: %s\n", qPrintable(line));
-		if (seen.isEmpty())
-			std::printf("button: NONE\n");
-
-		// Not part of the pass/fail: without it the chord still works, the
-		// volume slider just ends up in the picture. Worth reporting because it
-		// is the difference between "it works" and "it works properly".
-		std::printf("volume: %s\n", buttons.canReplay()
-			? "held 150 ms (its panel will not show in the screenshot)"
-			: "NOT held -- /dev/uinput missing, its panel will show in the screenshot");
-		std::printf("order:   volume-down FIRST, then power"
-			" (the other way round locks the screen)\n");
-
-		const bool spectacle = QDBusConnection::sessionBus().interface()
-			&& (QDBusConnection::sessionBus().interface()
-				->isServiceRegistered(QStringLiteral("org.kde.Spectacle"))
-			|| QDBusConnection::sessionBus().interface()
-				->activatableServiceNames().value()
-				.contains(QStringLiteral("org.kde.Spectacle")));
-		std::printf("spectacle: %s\n", spectacle ? "yes" : "NO");
-
-		const bool power = std::any_of(seen.cbegin(), seen.cend(), [](const QString &s) {
-			return s.contains(QStringLiteral("power"));
-		});
-		const bool vol = std::any_of(seen.cbegin(), seen.cend(), [](const QString &s) {
-			return s.contains(QStringLiteral("volume-down"));
-		});
-		return (power && vol && spectacle) ? 0 : 1;
-	}
-
-	// Only one watcher. A second one would grab the same power button and the
-	// two would fight over it -- and, being a service that restarts itself,
-	// that is a state you could easily end up in by hand.
+	// Only one instance. The bus name is the whole entry point now: the key
+	// chord lives in phone-keyconfig, which calls shoot() on
+	// org.surya.Screenglaze, and a second copy could not own that name --
+	// being a service that restarts itself, that is a state you could easily
+	// end up in by hand.
 	auto bus = QDBusConnection::sessionBus();
 	if (!bus.registerService(busName)) {
 		// Already running: hand the request over and get out of the way. That
-		// makes the launcher icon and `screenglaze` from a terminal behave as
-		// a shutter button instead of starting a rival copy.
+		// makes `screenglaze` from a terminal behave as a shutter button
+		// instead of starting a rival copy.
 		QDBusMessage m = QDBusMessage::createMethodCall(busName,
 			QStringLiteral("/"), busName, QStringLiteral("shoot"));
 		bus.call(m, QDBus::Block, 3000);
@@ -190,8 +141,8 @@ int main(int argc, char *argv[])
 	if (engine.rootObjects().isEmpty())
 		return 1;
 
-	// --capture: take one straight away. Handy for testing over ssh, where
-	// there are no buttons to press. --capturar, its old name, still works.
+	// --capture: take one straight away. Handy for testing over ssh, without
+	// phone-keyconfig in the loop. --capturar, its old name, still works.
 	if (args.contains(QStringLiteral("--capture"))
 		|| args.contains(QStringLiteral("--capturar")))
 		QTimer::singleShot(500, &backend, &Backend::shoot);

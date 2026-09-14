@@ -1,11 +1,12 @@
-# Screenglaze: the screenshot key combo, and the sheet that follows it.
+# Screenglaze: the screenshot sheet, and the D-Bus method that brings it up.
 #
-# Built as a real binary rather than a shell script for one reason: the key
-# combo has to be watched from a process that never dies, and that process also
-# has to own an EVIOCGRAB on the power button for the few milliseconds the combo
-# lasts. A script cannot hold a grab across two devices without racing itself.
+# The key chord is NOT handled here. phone-keyconfig owns the power and volume
+# keys and, when it sees volume-down + power, calls `shoot` on the bus name
+# org.surya.Screenglaze (object /, interface org.surya.Screenglaze). This
+# process only has to stay on the bus, take the picture through Spectacle and
+# show the sheet to share, save or crop it.
 cmake_minimum_required(VERSION 3.20)
-project(screenglaze VERSION 1.2)
+project(screenglaze VERSION 1.4)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -21,8 +22,6 @@ qt_add_executable(screenglaze
 	src/main.cpp
 	src/backend.cpp
 	src/backend.h
-	src/buttons.cpp
-	src/buttons.h
 	src/capture.cpp
 	src/capture.h
 )
@@ -70,15 +69,9 @@ install(FILES screenglaze.desktop
 install(FILES screenglaze.svg
 	DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps)
 
-# The udev rule is what makes the two buttons readable at all. It has to be
-# packaged, not left to the setup script: without it the service starts, finds
-# no readable device and does nothing, which looks exactly like a working
-# install until you press the combo.
-install(FILES 71-screenglaze.rules
-	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/udev/rules.d)
-
-# The user service. Installed disabled; `systemctl --user enable` is the setup
-# script's job, so that installing the package never starts watching keys
+# The user service keeps the D-Bus provider running so phone-keyconfig always
+# has someone to call. Installed disabled; `systemctl --user enable` is the
+# setup script's job, so that installing the package never starts a service
 # behind the user's back.
 install(FILES screenglaze.service
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/systemd/user)

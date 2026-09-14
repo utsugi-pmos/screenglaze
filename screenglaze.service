@@ -1,8 +1,8 @@
 [Unit]
-# Screenglaze has to be running for the key combo to exist at all: there is no
-# daemon behind it, the process itself is what holds the two /dev/input file
-# descriptors. If it is not running, the buttons do nothing.
-Description=Screenglaze: screenshots with volume-down + power
+# Screenglaze has to be running for the chord to do anything: phone-keyconfig
+# watches the buttons and calls shoot() on org.surya.Screenglaze over D-Bus,
+# and that call only lands if this process is on the bus to answer it.
+Description=Screenglaze: screenshot sheet, triggered over D-Bus
 Documentation=file:///usr/share/doc/screenglaze/README.md
 PartOf=graphical-session.target
 After=graphical-session.target

@@ -1,7 +1,19 @@
 # Screenglaze
 
-Screenshots on Plasma Mobile with **volume-down + power**, like Android, and a
-sheet to share, save or crop what you just took.
+The screenshot sheet for Plasma Mobile: share, save or crop what you just took.
+
+The **volume-down + power** chord itself is not handled here. It lives in
+phone-keyconfig, which owns the hardware keys and asks Screenglaze for a
+capture over D-Bus:
+
+```sh
+# What phone-keyconfig does when it sees the chord; handy for testing over ssh.
+busctl --user call org.surya.Screenglaze / org.surya.Screenglaze shoot
+```
+
+`screenglaze --capture` from a terminal ends up in the same place: with the
+service already running, the second copy hands the request over the bus and
+exits.
 
 Packaged for postmarketOS in
 [utsugi-pmaports](https://github.com/utsugi-pmos/utsugi-pmaports):
